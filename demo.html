@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#17211b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="DueTrail">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="DueTrail is a local-only invoice follow-up workspace. It keeps payment context and reminder drafts beside invoices you already created elsewhere.">
+  <title>DueTrail demo — follow-up workspace</title>
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="demo-page">
+  <a class="skip" href="#main">Skip to workspace</a>
+  <div class="page">
+    <header class="site-header">
+      <div class="brand">
+        <p class="eyebrow"><a href="./">DueTrail</a> · free demo</p>
+        <h1>Know who owes you, and what to say next.</h1>
+        <p class="sub">The follow-up workspace by Sallar Hussain Bali. Keep the invoicing tool that sent the invoice. Copy the reminder yourself. Accounts and paid plans are not live in this demo.</p>
+      </div>
+      <div class="header-actions">
+        <a class="button" href="./">Overview</a>
+        <button type="button" class="button" id="backup-button">Backup</button>
+        <button type="button" class="button" id="restore-button">Restore</button>
+        <button type="button" class="button" id="csv-button">Export CSV</button>
+        <button type="button" class="button button-primary" id="add-button">Add invoice</button>
+        <input id="restore-file" class="visually-hidden" type="file" accept="application/json,.json">
+      </div>
+    </header>
+
+    <aside class="privacy" aria-label="Privacy and storage">
+      <p><strong>Saved only in this browser, on this device.</strong> Browser storage is not encrypted, not a backup, and not audit-grade evidence. It is not a secure financial system. Use the fictitious sample records. Do not paste confidential client details or bank information.</p>
+      <p>DueTrail does not send email or WhatsApp, does not take payment, and cannot make a client pay you.</p>
+      <p id="storage-status"></p>
+    </aside>
+
+    <aside id="sample-guide" class="sample-guide" aria-labelledby="sample-guide-heading">
+      <h2 id="sample-guide-heading">Try one follow-up</h2>
+      <ol id="sample-steps"></ol>
+      <p id="sample-note"></p>
+    </aside>
+
+    <p id="app-alert" class="alert" role="alert" hidden></p>
+    <noscript>
+      <p class="alert">DueTrail needs JavaScript to run in this browser. It still does not contact a server.</p>
+    </noscript>
+
+    <div class="mobile-switch" id="mobile-switch" role="tablist" aria-label="Workspace sections">
+      <button type="button" role="tab" id="tab-queue" aria-controls="home-view" aria-selected="true">Queue</button>
+      <button type="button" role="tab" id="tab-invoices" aria-controls="list-pane" aria-selected="false">Invoices</button>
+    </div>
+
+    <main id="main" class="workspace">
+      <aside id="list-pane" aria-labelledby="list-heading">
+        <div class="pane-head">
+          <h2 id="list-heading">Invoices</h2>
+          <p class="muted" id="list-count"></p>
+        </div>
+        <div class="filters">
+          <div>
+            <label for="search">Search <span class="kbd" aria-hidden="true">/</span></label>
+            <input id="search" type="search" placeholder="Client, reference, or contact" autocomplete="off">
+          </div>
+          <div>
+            <label for="status-filter">Show</label>
+            <select id="status-filter">
+              <option value="all">All current</option>
+              <option value="open">Open</option>
+              <option value="paid">Paid</option>
+              <option value="disputed">Disputed</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <div id="list-empty" class="empty" hidden></div>
+        <ul id="invoice-list" class="invoice-list"></ul>
+      </aside>
+
+      <section id="main-pane">
+        <div id="home-view">
+          <div class="pane-head">
+            <h2 id="queue-heading" tabindex="-1">Today's follow-ups</h2>
+            <p class="sub">Missed promises come first, then older overdue invoices, then check-ins you scheduled. Paid and disputed invoices stay off this list.</p>
+          </div>
+          <div class="sender-row">
+            <label for="home-sender">Sign reminders as</label>
+            <input id="home-sender" maxlength="80" autocomplete="name" placeholder="Your name">
+          </div>
+          <ul id="totals" class="totals" aria-label="Outstanding by currency"></ul>
+          <p id="totals-note" class="muted totals-note"></p>
+          <h3 id="disputed-label" hidden>Disputed, not in the queue</h3>
+          <ul id="disputed-totals" class="totals" aria-label="Disputed balances by currency"></ul>
+          <p id="queue-count" class="muted"></p>
+          <ol id="queue-list" class="queue"></ol>
+          <div id="queue-empty" class="empty" hidden></div>
+        </div>
+        <div id="detail-view" hidden></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <section aria-labelledby="how-heading">
+        <h2 id="how-heading">How the follow-up works</h2>
+        <ol class="steps">
+          <li>
+            <h3>Add an invoice</h3>
+            <p>Reference, client, currency, total, due date, and what has already been paid. DueTrail does not create the invoice in your accounting tool.</p>
+          </li>
+          <li>
+            <h3>Record the payment context</h3>
+            <p>Who can actually approve payment, which submission steps are still open, and the date they promised.</p>
+          </li>
+          <li>
+            <h3>Copy a reminder and log the outcome</h3>
+            <p>Edit the draft, copy it, and send it yourself. Then log a promise, a partial payment, a dispute, or paid in full.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section aria-labelledby="pricing-heading">
+        <h2 id="pricing-heading">Planned prices, not a checkout</h2>
+        <p>This demo is free. Solo at US$9/month and Team at US$19/month are the planned prices for a later version with accounts and sync. They are not for sale here, and this page does not take a card. <a href="./#pricing">Read the plan on the overview</a>.</p>
+      </section>
+
+      <section aria-labelledby="faq-heading">
+        <h2 id="faq-heading">Questions worth answering first</h2>
+        <details>
+          <summary>Does this replace my invoicing tool?</summary>
+          <p>No. Track invoices you already create elsewhere. DueTrail is the follow-up desk, not QuickBooks, Wave, or a ledger.</p>
+        </details>
+        <details>
+          <summary>Does it send messages?</summary>
+          <p>Not in this prototype. You review and copy the text, then send it yourself. Nothing is emailed or messaged automatically.</p>
+        </details>
+        <details>
+          <summary>Where is demo data stored?</summary>
+          <p>In this browser only. Use sample data. Browser storage is not a secure, backed-up financial system, and it is not audit-grade evidence.</p>
+        </details>
+        <details>
+          <summary>Will this get the invoice paid?</summary>
+          <p>No. Software can show the next useful step. It cannot make an unwilling or insolvent client pay, and DueTrail does not promise recovery.</p>
+        </details>
+      </section>
+
+      <section aria-labelledby="limits-heading">
+        <h2 id="limits-heading">What this demo will not do</h2>
+        <p>DueTrail is made by Sallar Hussain Bali. The name is not a cleared trademark. There is no account, bank connection, payment form, debt collection, or automatic reminder. On a phone, the browser menu can install this demo to the home screen. That copy still stores data only on the device. Reset sample data if you want the fictitious workspace back. <a href="./">Back to the overview</a>.</p>
+        <p><button type="button" class="button" id="reset-sample">Reset sample data</button></p>
+      </section>
+    </footer>
+  </div>
+
+  <dialog id="invoice-dialog" aria-labelledby="invoice-dialog-title">
+    <form id="invoice-form" autocomplete="off">
+      <div class="dialog-head">
+        <h2 id="invoice-dialog-title">Add invoice</h2>
+        <p class="muted">Fields marked * are required. Amounts use up to 2 decimal places. Dates must be real calendar dates.</p>
+      </div>
+      <div id="form-errors" class="form-errors" role="alert" tabindex="-1" hidden></div>
+      <fieldset>
+        <legend>Invoice</legend>
+        <div class="form-grid">
+          <div>
+            <label for="field-reference">Invoice reference <span class="req" aria-hidden="true">*</span></label>
+            <input id="field-reference" maxlength="40" aria-required="true" aria-describedby="field-reference-error">
+            <p id="field-reference-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-client">Client <span class="req" aria-hidden="true">*</span></label>
+            <input id="field-client" maxlength="120" aria-required="true" aria-describedby="field-client-error">
+            <p id="field-client-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-currency">Currency <span class="req" aria-hidden="true">*</span></label>
+            <select id="field-currency" aria-required="true" aria-describedby="field-currency-error"></select>
+            <p id="field-currency-error" class="field-error"></p>
+          </div>
+          <div id="currency-other-wrap" hidden>
+            <label for="field-currency-other">Other currency code</label>
+            <input id="field-currency-other" maxlength="3" autocapitalize="characters" spellcheck="false" aria-describedby="field-currency-other-error" placeholder="CHF">
+            <p id="field-currency-other-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-amount">Invoice total <span class="req" aria-hidden="true">*</span></label>
+            <input id="field-amount" inputmode="decimal" maxlength="13" aria-required="true" aria-describedby="field-amount-error" placeholder="2400.00">
+            <p id="field-amount-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-paid">Paid so far</label>
+            <input id="field-paid" inputmode="decimal" maxlength="13" aria-describedby="field-paid-help field-paid-error" placeholder="0.00">
+            <p id="field-paid-help" class="help">Marking the status as paid sets this to the total.</p>
+            <p id="field-paid-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-due">Due date <span class="req" aria-hidden="true">*</span></label>
+            <input id="field-due" type="date" aria-required="true" aria-describedby="field-due-error" min="1990-01-01" max="9999-12-31">
+            <p id="field-due-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-status">Status</label>
+            <select id="field-status" aria-describedby="field-status-error">
+              <option value="open">Open</option>
+              <option value="paid">Paid</option>
+              <option value="disputed">Disputed</option>
+            </select>
+            <p id="field-status-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-promise">Promise date</label>
+            <input id="field-promise" type="date" aria-describedby="field-promise-error" min="1990-01-01" max="9999-12-31">
+            <p id="field-promise-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-follow">Next follow-up</label>
+            <input id="field-follow" type="date" aria-describedby="field-follow-error" min="1990-01-01" max="9999-12-31">
+            <p id="field-follow-error" class="field-error"></p>
+          </div>
+        </div>
+      </fieldset>
+      <div id="dispute-wrap" hidden>
+        <label for="field-dispute">Dispute note</label>
+        <textarea id="field-dispute" maxlength="2000" aria-describedby="dispute-help field-dispute-error"></textarea>
+        <p id="dispute-help" class="help">Required when you move an invoice into disputed. Follow-ups pause until you reopen it.</p>
+        <p id="field-dispute-error" class="field-error"></p>
+      </div>
+      <fieldset>
+        <legend>Payment contact</legend>
+        <div class="form-grid">
+          <div>
+            <label for="field-contact-name">Name</label>
+            <input id="field-contact-name" maxlength="80" aria-describedby="field-contact-name-error">
+            <p id="field-contact-name-error" class="field-error"></p>
+          </div>
+          <div>
+            <label for="field-contact-role">Role</label>
+            <input id="field-contact-role" maxlength="80" aria-describedby="field-contact-role-error" placeholder="Accounts payable">
+            <p id="field-contact-role-error" class="field-error"></p>
+          </div>
+          <div class="span-2">
+            <label for="field-contact-email">Email</label>
+            <input id="field-contact-email" maxlength="120" autocomplete="off" aria-describedby="field-contact-email-error" placeholder="name@client.example">
+            <p id="field-contact-email-error" class="field-error"></p>
+          </div>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Submission checklist</legend>
+        <p class="help">What their side still needs before the payment can move. Checked items are treated as done.</p>
+        <div id="checklist-editor" tabindex="-1" aria-describedby="field-checklist-error"></div>
+        <p id="field-checklist-error" class="field-error"></p>
+        <div class="row-actions">
+          <button type="button" class="button" id="add-check-item">Add item</button>
+          <button type="button" class="button" id="add-common-checks">Insert common items</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Notes</legend>
+        <div>
+          <label for="field-acceptance">Acceptance note</label>
+          <textarea id="field-acceptance" maxlength="2000" aria-describedby="field-acceptance-error"></textarea>
+          <p id="field-acceptance-error" class="field-error"></p>
+        </div>
+        <div>
+          <label for="field-last">Last message summary</label>
+          <textarea id="field-last" maxlength="280" aria-describedby="field-last-error"></textarea>
+          <p id="field-last-error" class="field-error"></p>
+        </div>
+      </fieldset>
+      <div class="dialog-actions">
+        <button type="button" class="button" id="invoice-cancel">Cancel</button>
+        <button type="submit" class="button button-primary" id="invoice-save">Save invoice</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="template-dialog" aria-labelledby="template-dialog-title">
+    <form id="template-form">
+      <div class="dialog-head">
+        <h2 id="template-dialog-title">Reminder templates</h2>
+        <p class="muted">Placeholders: {{contact}}, {{client}}, {{reference}}, {{currency}}, {{outstanding}}, {{due}}, {{promise}}, {{checklist}}, {{sender}}, {{followUpBy}}. Saving changes the drafts you generate next. It does not send anything.</p>
+      </div>
+      <div id="template-errors" class="form-errors" role="alert" tabindex="-1" hidden></div>
+      <label for="template-friendly">Friendly</label>
+      <textarea id="template-friendly" maxlength="5000"></textarea>
+      <label for="template-direct">Direct</label>
+      <textarea id="template-direct" maxlength="5000"></textarea>
+      <label for="template-final">Final</label>
+      <textarea id="template-final" maxlength="5000"></textarea>
+      <div class="dialog-actions">
+        <button type="button" class="button" id="template-reset">Restore default wording</button>
+        <button type="button" class="button" id="template-cancel">Cancel</button>
+        <button type="submit" class="button button-primary">Save templates</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirm-dialog" aria-labelledby="confirm-title">
+    <form method="dialog">
+      <h2 id="confirm-title">Confirm</h2>
+      <p id="confirm-body"></p>
+      <div class="dialog-actions">
+        <button type="submit" class="button" value="cancel">Cancel</button>
+        <button type="submit" class="button button-primary" id="confirm-ok" value="ok">Confirm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="live" class="visually-hidden" aria-live="polite"></div>
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+  <script src="pwa.js"></script>
+</body>
+</html>
