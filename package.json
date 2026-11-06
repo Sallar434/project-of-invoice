@@ -1,0 +1,21 @@
+{
+  "name": "duetrail",
+  "private": true,
+  "version": "0.1.0",
+  "description": "DueTrail follow-up workspace by Sallar Hussain Bali. Web demo plus Capacitor shells for iOS and Android. Not a live checkout.",
+  "scripts": {
+    "start": "python3 -m http.server 8080 --bind 127.0.0.1",
+    "test": "node --test tests/logic.test.js tests/pwa.test.js",
+    "cap:sync": "cap sync",
+    "cap:android": "cap open android",
+    "cap:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/ios": "8.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0"
+  }
+}

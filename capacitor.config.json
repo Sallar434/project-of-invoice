@@ -1,0 +1,15 @@
+{
+  "appId": "com.sallarhussainbali.duetrail",
+  "appName": "DueTrail",
+  "webDir": ".",
+  "backgroundColor": "#f3f1ea",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}
